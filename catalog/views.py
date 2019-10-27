@@ -1,6 +1,6 @@
 """views.py"""
 from django.shortcuts import render
-from catalog.models import Book, Author, BookInstance, Genre
+from catalog.models import Book, Author, BookInstance
 from django.views import generic
 
 #function way
@@ -33,9 +33,17 @@ def index(request):
 
 class BookListView(generic.ListView):
 	model = Book
+	paginate_by = 10
+	
+class AuthorListView(generic.ListView):
+	model = Author
+	paginate_by = 10
 	
 #Class-based detail view
 
 class BookDetailView(generic.DetailView):
 	model = Book
+	
+class AuthorDetailView(generic.DetailView):
+	model = Author
 

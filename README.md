@@ -327,6 +327,35 @@ the view will pass it the database information for the specific Book record extr
 The one interesting thing we haven't seen before is the function book.bookinstance_set.all(). This method is "automagically" constructed by Django in order to return the set of BookInstance records associated with a particular Book.
 And although there is an all(), there is no filter() LOL.
 
+#### Include Pagination
+
+- add `paginate_by = 10` as an attribute to listview class in views. but this only 
+paginates the data. in the sense The different pages are accessed using GET parameters — to access page 2 you would use the URL: /catalog/books/?page=2.
+
+- to include this in html,
+add following in base_generic.html
+
+```
+{% block content %}{% endblock %}
+  
+  {% block pagination %}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+  {% endblock %}
+```
 ### for admin login
 username: swapnil
 
