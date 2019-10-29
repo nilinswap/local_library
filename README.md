@@ -2,53 +2,50 @@
 
 Tutorial follow.
 
-- pyenv virtualenv 3.7 ll
-
-- pyenv activate ll
-
-- pip install -r requirements.txt
+```bash
+pyenv virtualenv 3.7 ll
+pyenv activate ll
+pip install -r requirements.txt
+```
 
 ## Steps into setting up a simple django app
 
-##### make website folder (which is contextually root folder) by `django-admin start projectname`
-
-    - __init__.py is to treat this directory as a Python package( an entity that can be imported with dotted names.)
-    - wsgi.py is to help communicate with the web server.
+##### Make website folder (which is contextually root folder) using `django-admin start projectname`
+- __init__.py is to treat this directory as a Python package( an entity that can be imported with dotted names.)
+- wsgi.py is to help communicate with the web server.
 
 ##### `python manage.py startapp catalog` to create a new app.
 
 
-##### add app in `INSTALLED_APPS` in settings.py.
+##### Add app in `INSTALLED_APPS` in settings.py.
+- SECRET_KEY: This is a secret key that is used as part of Django's website security strategy. If you're not protecting this code in development, you'll need to use a different code (perhaps read from an environment variable or file) when putting it into production.
+- DEBUG: This enables debugging logs to be displayed on error, rather than HTTP status code responses. This should be set to False on production as debug information is useful for attackers, but for now we can keep it set to True.
 
-
-    - SECRET_KEY. This is a secret key that is used as part of Django's website security strategy. If you're not protecting this code in development, you'll need to use a different code (perhaps read from an environment variable or file) when putting it into production.
-    - DEBUG. This enables debugging logs to be displayed on error, rather than HTTP status code responses. This should be set to False on production as debug information is useful for attackers, but for now we can keep it set to True.
-
-##### populate urls.py of project_folder
-
-    - if linked it with urls.py of an app, populate app's urls too.
-    - Attaching a general template
+##### Populate urls.py of project_folder
+- If linked it with urls.py of an app, populate app's urls too.
+- Attaching a general template
         `
-        urlpatterns = [
-            url(r'^admin/', admin.site.urls),
-            path('catalog/', include('catalog.urls')),
-            path('', RedirectView.as_view(url='/catalog/', permanent=True)),
-        ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-        `
-      for an app name catalog.
+    urlpatterns = [
+        url(r'^admin/', admin.site.urls),
+        path('catalog/', include('catalog.urls')),
+        path('', RedirectView.as_view(url='/catalog/', permanent=True)),
+    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    `
+for an app name catalog.
 
 ##### Test if all works minimally
-
-- python manage.py makemigrations
-- python manage.py migrate
-- python manage.py runserver
-- see an django-known page in 127.0.0.1:8000/
-
-##### Create Model
-
-- decide a model structure. might have to use uml diagrams
-- app's model.py needs editing. add this
+```bash
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
 ```
+Open `127.0.0.1:8000` to see the familiar django page. 
+
+##### Create Models
+
+- Decide a model structure. Might have to use uml diagrams.
+- App's model.py needs editing. Add this
+```python
 from django.db import models
 from django.urls import reverse
 
@@ -144,27 +141,25 @@ class BookInstance(models.Model):
         """String for representing the Model object."""
         return f"{self.id} ({self.book.title})"
 
-
-
 ```
 
-this model.py is incomplete as it has not yet added Author and Language.
+This model.py is incomplete as it has not yet added Author and Language.
 Since Author is not yet defined therefore we can not use Author object and use
 string "Author" instead unlike for book in BookInstance.
 
 ##### Register Model with Admin
 
-- open catalog's admin.py and paste
+- Open catalog's admin.py and paste
+```python
+from catalog.models import Author, Genre, Book, BookInstance
 
-     ```from catalog.models import Author, Genre, Book, BookInstance
-     
-        admin.site.register(Book)```
-- One can customise Admin site to advanced. follow [this.](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Admin_site)
+admin.site.register(Book)
+```
+- One can customise Admin site to advanced. Follow [this.](https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Admin_site)
 
 ##### So much but no page displayed yet..
-- So far catalog's urls is empty. although we have called this from project's urls
-so add to catalog/urls.py
-```
+- So far catalog's urls is empty. Although we have called this from project's urls so add to catalog/urls.py
+```python
 from . import views
 
 urlpatterns = [
@@ -172,8 +167,8 @@ urlpatterns = [
 ]
 ```
 
-- in views.py, add index function that above url mapped to
-```
+- In views.py, add index function that above url mapped to
+```python
 from catalog.models import Book, Author, BookInstance, Genre
 
 def index(request):
@@ -199,13 +194,12 @@ def index(request):
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
 ```
-`render() takes template as index.html and insert context into it to return an HTML response.`
+- render() takes template as index.html and insert context into it to return an HTML response.
 
-#### create a template
+#### Create a template
     
-Create template/ inside catalog(our app) and inside
-it create base_generic.html with following code
-```
+Create template/ inside catalog(our app) and inside it create base_generic.html with following code
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -235,28 +229,27 @@ it create base_generic.html with following code
 </body>
 </html>
 ```
-this will be extended for every page hence the name.
+This will be extended for every page hence the name.
 
-- see `load static` block this loads style.css
-and expect it inside css/ and this path is relative to
+- See `load static` block this loads style.css and expect it inside css/ and this path is relative to
 STATIC_URL defined in settings.py ( pointed out by `static` block inside latter)
 
-- see `block` and `endblock` block which creates holes for data to be inserted
+- See `block` and `endblock` block which creates holes for data to be inserted
 
-- see `url` block
+- See `url` block
     The tag here accepts the name of a path() function called in your urls.py 
 and the values for any arguments that the associated view will receive from that
 function, and returns a URL that you can use to link to the resource.
 
 #### Books and Authors page
 
-- using generic class-based list views. 
-    - add following to url_patterns in catalog/urls.py
+- Using generic class-based list views. 
+    - Add following to url_patterns in catalog/urls.py
         ```
         path('books/', views.BookListView.as_view(), name='books'),
         ``` 
     - Add following lines in catalog.views.py
-```
+```python
 from django.views import generic
 
 class BookListView(generic.ListView):
@@ -267,9 +260,8 @@ That's it! The generic view will query the database to get all records for the s
 
 This awkward path for the template location isn't a misprint — the generic views look for templates in /application_name/the_model_name_list.html (catalog/book_list.html in this case) inside the application's /application_name/templates/ directory (/catalog/templates/).
 
-however this awkwardness can be customised to your comfort. e.g. an alternate way
-is given below
-```
+However this awkwardness can be customised to your comfort. e.g. an alternate way is given below
+```python
 class BookListView(generic.ListView):
     model = Book
     context_object_name = 'my_book_list'   # your own name for the list as a template variable
@@ -277,24 +269,24 @@ class BookListView(generic.ListView):
     template_name = 'books/my_arbitrary_template_name_list.html'  # Specify your own template name/location
 ```
 
-this is still incomplete until you describe a detail page(as we are using book.get_absolute_url in above template). so let's do that first
+This is still incomplete until you describe a detail page(as we are using book.get_absolute_url in above template). so let's do that first.
 
 #### Book detail page
 
-- add in catalog.urls 
+- Add in catalog.urls 
 ```
 re_path(r'^book/(?P<pk>\d+)$', views.BookDetailView.as_view(), name='book-detail'),
 ```
 
-- add in views
+- Add in views
 ```
 class BookDetailView(generic.DetailView):
     model = Book
 ```
 
-also, so if there is no record for the given pk then http404 response is sent by django just alright. 
-- create a file book_detail.html inside templates/catalog/ 
-```
+Also, so if there is no record for the given pk then http404 response is sent by django just alright. 
+- Create a file book_detail.html inside templates/catalog/ 
+```html
 {% extends "base_generic.html" %}
 
 {% block content %}
@@ -322,20 +314,20 @@ also, so if there is no record for the given pk then http404 response is sent by
 {% endblock %}
 
 ```
-the view will pass it the database information for the specific Book record extracted by the URL mapper. Within the template you can access the list of books with the template variable named object OR book (i.e. generically "the_model_name"). as pointed before, you can always customise.
+The view will pass it the database information for the specific Book record extracted by the URL mapper. Within the template you can access the list of books with the template variable named object OR book (i.e. generically "the_model_name"). as pointed before, you can always customise.
 
 The one interesting thing we haven't seen before is the function book.bookinstance_set.all(). This method is "automagically" constructed by Django in order to return the set of BookInstance records associated with a particular Book.
 And although there is an all(), there is no filter() LOL.
 
 #### Include Pagination
 
-- add `paginate_by = 10` as an attribute to listview class in views. but this only 
+- Add `paginate_by = 10` as an attribute to listview class in views. but this only 
 paginates the data. in the sense The different pages are accessed using GET parameters — to access page 2 you would use the URL: /catalog/books/?page=2.
 
-- to include this in html,
+- To include this in html,
 add following in base_generic.html
 
-```
+```html
 {% block content %}{% endblock %}
   
   {% block pagination %}
@@ -356,7 +348,7 @@ add following in base_generic.html
     {% endif %}
   {% endblock %}
 ```
-### for admin login
-username: swapnil
+### For admin login
 
+username: swapnil
 password: asd
