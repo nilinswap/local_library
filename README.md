@@ -357,6 +357,7 @@ add following in base_generic.html
 - If a session, as a dict, changes then django saves the session itself. However instead
 if the data inside the session changed, for example one shown below for wheels, tell
 django to modify and save django session manually
+- The Session was enabled from start. The configuration is set up in the INSTALLED_APPS and MIDDLEWARE sections of the project file (locallibrary/locallibrary/settings.py)
 ```python
 # This is detected as an update to the session, so session data is saved.
 request.session['my_car'] = 'mini'
@@ -368,6 +369,80 @@ request.session['my_car']['wheels'] = 'alloy'
 request.session.modified = True
 
 ```
+
+#### Auth
+
+- Django provides an authentication and authorization ("permission") system, built on top of the session framework
+- The Auth was enabled from start. The configuration is set up in the INSTALLED_APPS and MIDDLEWARE sections of the project file (locallibrary/locallibrary/settings.py)
+
+##### Create users and groups
+- Our superuser is already authenticated and has all permissions, so we'll need to create a test user to represent a normal site user.
+- Create a Group first, use django admin site
+- Create a user. One can also use django shell. it is just that easy.
+##### Setting up auth views
+- We will attach url to main project instead of an app like catalog here
+because we want all apps to use same auth model
+- Add url
+```python
+#Add Django site authentication urls (for login, logout, password management)
+urlpatterns += [
+    path('accounts/', include('django.contrib.auth.urls')),
+]
+```
+- Create a new folder templates in project. The URLs (and implicitly views) that we just added expect to find their associated templates in a directory /registration/ somewhere in the templates search path.
+but since this is a service for the project we will need to create a new folder 'templates' as a sibling to 
+catalog (instead of using catalog's template) and in it create registration/.
+
+- Create a login.html inside registration and paste following
+```html
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+{% if form.errors %}
+  <p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+  {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+  {% else %}
+    <p>Please login to see this page.</p>
+  {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<table>
+
+<tr>
+  <td>{{ form.username.label_tag }}</td>
+  <td>{{ form.username }}</td>
+</tr>
+
+<tr>
+  <td>{{ form.password.label_tag }}</td>
+  <td>{{ form.password }}</td>
+</tr>
+</table>
+
+<input type="submit" value="login" />
+<input type="hidden" name="next" value="{{ next }}" />
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+{% endblock %}
+```
+
+
+
 ### for admin login
 username: swapnil
 password: asd
+
+### for test user login
+username: Alberto
+password: 3483ajsd
