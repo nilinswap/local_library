@@ -446,6 +446,11 @@ LOGIN_REDIRECT_URL = '/'
 - for accounts/logout/, django opens admin logout page therefore overwrite this by 
 creating a 'logged_out.html'
 
+- did you notice? how template inside templates/registration/ can access base_generic.html
+defined inside catalog/templates. This is because we added Templates
+configuration in settings.py
+
+
 ##### Password Reset
 
 - just like above point, one has to overwrite for password_reset_form, password_reset_done etc.
