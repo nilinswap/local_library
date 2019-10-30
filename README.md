@@ -510,7 +510,12 @@ Paste the following in
 
         ```
 
-
+###Juice out
+- Can you notice Django is just
+    - Extend model and migrate
+    - Extend view that uses model
+    - Extend template, create holes for context and combine template and context in view
+    - Finally extend urls to let browser call the view.
    
 
 
