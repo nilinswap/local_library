@@ -446,8 +446,12 @@ LOGIN_REDIRECT_URL = '/'
 - for accounts/logout/, django opens admin logout page therefore overwrite this by 
 creating a 'logged_out.html'
 
--
+##### Password Reset
 
+- just like above point, one has to overwrite for password_reset_form, password_reset_done etc.
+- One must also create password_reset_mail template that will be
+sent in the email for password reset
+- create password_confirm template
 
 ### for admin login
 username: swapnil
