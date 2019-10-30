@@ -1,6 +1,7 @@
 from django.db import models
 from django.urls import reverse
-
+from django.contrib.auth.models import User
+from datetime import date
 # Used to generateURLs by reversingtheURLpatterns
 import uuid
 
@@ -86,12 +87,20 @@ class BookInstance(models.Model):
         help_text="Book availability",
     )
 
+    borrower = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,
+                                 blank=True)
     class Meta:
         ordering = ["due_back"]
 
     def __str__(self):
         """String for representing the Model object."""
         return f"{self.id} ({self.book.title})"
+
+    @property
+    def is_overdue(self):
+        if self.due_back and date.today() > self.due_back:
+            return True
+        return False
 
 
 class Author(models.Model):

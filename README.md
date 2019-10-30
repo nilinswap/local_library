@@ -461,18 +461,58 @@ sent in the email for password reset
 ##### Use Auth
 There are two ways this can be done
 
-- ###### Applying Condition on Templates
+- ###### Using in Templates
     - Note also how we have appended ?next={{request.path}} to the end of the URLs. What this does is add a URL parameter next containing the address (URL) of the current page, to the end of the linked URL. After the user has successfully logged in/out, the views will use this "next" value to redirect the user back to the page where they first clicked the login/logout link.
 Paste the following in 
-```html
- {% if user.is_authenticated %}
-     <li>User: {{ user.get_username }}</li>
-     <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
-   {% else %}
-     <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
-   {% endif %}
-      
-```
+    ```html
+     {% if user.is_authenticated %}
+         <li>User: {{ user.get_username }}</li>
+         <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>   
+       {% else %}
+         <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>   
+       {% endif %}
+          
+    ```
+
+- ###### Using in views
+
+    - in function-based view
+    
+        - use login_required decorator. pretty clean huh?
+        ```python
+        from django.contrib.auth.decorators import login_required
+        
+        @login_required
+        def my_view(request):
+        .
+        .
+        .
+        
+        ```
+
+        - Use is_authenticated attribute
+        ```python
+        from django.shortcuts import render
+
+        def my_view(request):
+            if not request.user.is_authenticated:
+                return render(request, 'myapp/login_error.html')
+            # ...
+        ```
+        
+    - in class-based view
+        
+        ```python
+        from django.contrib.auth.mixins import LoginRequiredMixin
+        class MyView(LoginRequiredMixin, View):
+            login_url = '/login/'
+            redirect_field_name = 'redirect_to'
+
+        ```
+
+
+   
+
 
 
 ### for admin login
