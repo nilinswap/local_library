@@ -437,6 +437,13 @@ catalog (instead of using catalog's template) and in it create registration/.
 {% endblock %}
 ```
 
+- After login, default redirect url is 'profile' to change it to index for our case
+add following to settings.py
+```python
+LOGIN_REDIRECT_URL = '/'
+```
+
+
 
 
 ### for admin login
