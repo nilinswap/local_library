@@ -356,6 +356,26 @@ add following in base_generic.html
     {% endif %}
   {% endblock %}
 ```
+
+#### Sessions Framework
+
+- All communication between web browsers and servers is via the HTTP protocol, which is stateless. 
+- Django uses a cookie containing a special session id to identify each browser and its associated session with the site. The actual session data is stored in the site database by default (this is more secure than storing the data in a cookie, where they are more vulnerable to malicious users)
+- You can access the session attribute in the view from the request parameter (an HttpRequest passed in as the first argument to the view).The session attribute is a dictionary-like object that you can read and write as many times as you like in your view, modifying it as wished.
+- If a session, as a dict, changes then django saves the session itself. However instead
+if the data inside the session changed, for example one shown below for wheels, tell
+django to modify and save django session manually
+```python
+# This is detected as an update to the session, so session data is saved.
+request.session['my_car'] = 'mini'
+
+# Session object not directly modified, only data within the session. Session changes not saved!
+request.session['my_car']['wheels'] = 'alloy'
+
+# Set session as modified to force data updates/cookie to be saved.
+request.session.modified = True
+
+```
 ### for admin login
 username: swapnil
 
