@@ -443,7 +443,10 @@ add following to settings.py
 LOGIN_REDIRECT_URL = '/'
 ```
 
+- for accounts/logout/, django opens admin logout page therefore overwrite this by 
+creating a 'logged_out.html'
 
+-
 
 
 ### for admin login
