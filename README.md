@@ -509,7 +509,51 @@ Paste the following in
             redirect_field_name = 'redirect_to'
 
         ```
+#### Permissions
 
+Permissions are associated with models and define the operations that can be performed on a model instance by a user who has the permission. By default, Django automatically gives add, change, and delete permissions to all models, which allow users with the permissions to perform the associated actions via the admin site. You can define your own permissions to models and grant them to specific users. You can also change the permissions associated with different instances of the same model.
+
+- Add permissions in a model's meta as shown below
+    ```python
+      class BookInstance(models.Model):
+        ...
+        class Meta:
+            ...
+            permissions = (("can_mark_returned", "Set book as returned"),)  
+    ```
+  needless to say -> makemigrate and migreate
+ 
+- Use in template 
+    use {{perm}} variable as shown below
+    ```html
+      {% if perms.catalog.can_mark_returned %}
+            <!-- We can mark a BookInstance as returned. -->
+            <!-- Perhaps add code to link to a "book return" view here. -->
+      {% endif %}
+    ``` 
+- Use in view
+    - function-based 
+        -  permission_required decorator
+        ```python
+            from django.contrib.auth.decorators import permission_required
+
+            @permission_required('catalog.can_mark_returned')
+            @permission_required('catalog.can_edit')
+            def my_view(request):
+               ...
+
+        ```
+    - class-based
+        ```python
+           from django.contrib.auth.mixins import PermissionRequiredMixin
+
+           class MyView(PermissionRequiredMixin, View):
+                permission_required = 'catalog.can_mark_returned'
+                # Or multiple permissions
+                permission_required = ('catalog.can_mark_returned', 'catalog.can_edit')
+                # Note that 'catalog.can_edit' is just an example
+                # the catalog application doesn't have such permission!
+        ```
 ###Juice out
 - Can you notice Django is just
     - Extend model and migrate
