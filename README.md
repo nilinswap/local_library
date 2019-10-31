@@ -555,7 +555,7 @@ Permissions are associated with models and define the operations that can be per
                 # the catalog application doesn't have such permission!
         ```
 ###Juice out
-- Can you notice Django is just
+- Can you notice? Django is just
     - Extend model and migrate
     - Extend view that uses model
     - Extend template, create holes for context and combine template and context in view
@@ -571,3 +571,7 @@ password: asd
 ### for test user login
 username: Alberto
 password: 3483ajsd
+
+### for library user login
+username: Alex
+password: as293asd03
