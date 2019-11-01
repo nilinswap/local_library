@@ -708,6 +708,39 @@ If one wanted to create views for predifined task like below easily..
         success_url = reverse_lazy('authors')
     ```
  
+ - In this case, we use the reverse_lazy() function to redirect to our author list after an author has been deleted — reverse_lazy() is a lazily executed version of reverse(), used here because we're providing a URL to a class-based view attribute.
+ - The "create" and "update" views use the same template by default, which will be named after your model: model_name_form.html (you can change the suffix to something other than _form using the template_name_suffix field in your view, e.g. template_name_suffix = '_other_suffix')
+ so Create the template file locallibrary/catalog/templates/catalog/author_form.html and copy in the text below.
+```html
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <form action="" method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.as_table }}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
+```
+- The "delete" view expects to find a template named with the format model_name_confirm_delete.html (again, you can change the suffix using template_name_suffix in your view). Create the template file locallibrary/catalog/templates/catalog/author_confirm_delete.html and copy in the text below.
+```html
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<h1>Delete Author</h1>
+
+<p>Are you sure you want to delete the author: {{ author }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="Yes, delete.">
+</form>
+
+{% endblock %}
+```
 ### Juice out
 - Can you notice? Django is just
     - Extend model(or form) and migrate
