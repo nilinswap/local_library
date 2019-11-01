@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from catalog.forms import RenewBookForm
+from django.contrib.auth.decorators import permission_required
 
 # function way
 def index(request):
@@ -93,7 +94,7 @@ class LoanedBooksListView(
 
 
 
-
+@permission_required('catalog.can_mark_returned')
 def renew_book_librarian(request, pk):
     book_instance = get_object_or_404(BookInstance, pk=pk)
 

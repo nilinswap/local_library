@@ -582,9 +582,84 @@ The declaration syntax for a Form is very similar to that for declaring a Model,
             # Remember to always return the cleaned data.
             return data
     ``` 
+- Extend View
+    ```python
+    import datetime
+    
+    from django.contrib.auth.decorators import permission_required
+    from django.shortcuts import render, get_object_or_404
+    from django.http import HttpResponseRedirect
+    from django.urls import reverse
+    
+    from catalog.forms import RenewBookForm
+    
+    @permission_required('catalog.can_mark_returned')
+    def renew_book_librarian(request, pk):
+        book_instance = get_object_or_404(BookInstance, pk=pk)
+    
+        # If this is a POST request then process the Form data
+        if request.method == 'POST':
+    
+            # Create a form instance and populate it with data from the request (binding):
+            form = RenewBookForm(request.POST)
+    
+            # Check if the form is valid:
+            if form.is_valid():
+                # process the data in form.cleaned_data as required (here we just write it to the model due_back field)
+                book_instance.due_back = form.cleaned_data['renewal_date']
+                book_instance.save()
+    
+                # redirect to a new URL:
+                return HttpResponseRedirect(reverse('all-borrowed') )
+    
+        # If this is a GET (or any other method) create the default form.
+        else:
+            proposed_renewal_date = datetime.date.today() + datetime.timedelta(weeks=3)
+            form = RenewBookForm(initial={'renewal_date': proposed_renewal_date})
+    
+        context = {
+            'form': form,
+            'book_instance': book_instance,
+        }
+    
+        return render(request, 'catalog/book_renew_librarian.html', context)
+  
+    ```
+    - get_object_or_404(): Returns a specified object from a model based on its primary key value, and raises an Http404 exception (not found) if the record does not exist. 
+    - HttpResponseRedirect: This creates a redirect to a specified URL (HTTP status code 302).
+    - reverse(): This generates a URL from a URL configuration name and a set of arguments. It is the Python equivalent of the url tag that we've been using in our templates.
+    - After creating the form, we call render() to create the HTML page, specifying the template and a context that contains our form. In this case, the context also contains our BookInstance, which we'll use in the template to provide information about the book we're renewing.
+    - However, if this is a POST request, then we create our form object and populate it with data from the request. This process is called "binding" and allows us to validate the form.
+    - If the form is not valid we call render() again, but this time the form value passed in the context will include error messages.
+    - While you can also access the form data directly through the request (for example, request.POST['renewal_date'] or request.GET['renewal_date'] if using a GET request), this is NOT recommended. The cleaned data is sanitized, validated, and converted into Python-friendly types.
+- Extend Template
+    - Create the template referenced in the view (/catalog/templates/catalog/book_renew_librarian.html) and copy the code below into it:
+        ```html
+        {% extends "base_generic.html" %}
+
+        {% block content %}
+          <h1>Renew: {{ book_instance.book.title }}</h1>
+          <p>Borrower: {{ book_instance.borrower }}</p>
+          <p{% if book_instance.is_overdue %} class="text-danger"{% endif %}>Due date: {{ book_instance.due_back }}</p>
+            
+          <form action="" method="post">
+            {% csrf_token %}
+            <table>
+            {{ form.as_table }}
+            </table>
+            <input type="submit" value="Submit">
+          </form>
+        {% endblock %}
+
+        ```
+    - an empty action as shown, means that the form data will be posted back to the current URL of the page (which is what we want!).
+    - The {% csrf_token %} added just inside the form tags is part of Django's cross-site forgery protection. 
+    - Using {{ form.as_table }} as shown above, each field is rendered as a table row. You can also render each field as a list item (using {{ form.as_ul }} ) or as a paragraph (using {{ form.as_p }}).
+    - here form is a template variable so use it as you like.
+ 
 ### Juice out
 - Can you notice? Django is just
-    - Extend model and migrate
+    - Extend model(or form) and migrate
     - Extend view that uses model
     - Extend template, create holes for context and combine template and context in view
     - Finally extend urls to let browser call the view.
