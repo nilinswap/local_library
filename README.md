@@ -625,6 +625,7 @@ The declaration syntax for a Form is very similar to that for declaring a Model,
         return render(request, 'catalog/book_renew_librarian.html', context)
   
     ```
+    - The if-else block is a very common pattern used to handle post request method,
     - get_object_or_404(): Returns a specified object from a model based on its primary key value, and raises an Http404 exception (not found) if the record does not exist. 
     - HttpResponseRedirect: This creates a redirect to a specified URL (HTTP status code 302).
     - reverse(): This generates a URL from a URL configuration name and a set of arguments. It is the Python equivalent of the url tag that we've been using in our templates.
@@ -656,6 +657,56 @@ The declaration syntax for a Form is very similar to that for declaring a Model,
     - The {% csrf_token %} added just inside the form tags is part of Django's cross-site forgery protection. 
     - Using {{ form.as_table }} as shown above, each field is rendered as a table row. You can also render each field as a list item (using {{ form.as_ul }} ) or as a paragraph (using {{ form.as_p }}).
     - here form is a template variable so use it as you like.
+- ##### ModalForm
+    - with a lot of fields to edit, one can use ModalForm as used below in forms.py
+    ```python
+    from django.forms import ModelForm
+
+    from catalog.models import BookInstance
+    
+    class RenewBookModelForm(ModelForm):
+        def clean_due_back(self):
+           data = self.cleaned_data['due_back']
+           
+           # Check if a date is not in the past.
+           if data < datetime.date.today():
+               raise ValidationError(_('Invalid date - renewal in past'))
+    
+           # Check if a date is in the allowed range (+4 weeks from today).
+           if data > datetime.date.today() + datetime.timedelta(weeks=4):
+               raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
+    
+           # Remember to always return the cleaned data.
+           return data
+    
+        class Meta:
+            model = BookInstance
+            fields = ['due_back']
+            labels = {'due_back': _('Renewal date')}
+            help_texts = {'due_back': _('Enter a date between now and 4 weeks (default 3).')}
+    ```
+#### Generic Editing views
+If one wanted to create views for predifined task like below easily..
+- Open the views file (locallibrary/catalog/views.py) and append the following code block to the bottom of it:
+    ```python
+    from django.views.generic.edit import CreateView, UpdateView, DeleteView
+    from django.urls import reverse_lazy
+    
+    from catalog.models import Author
+    
+    class AuthorCreate(CreateView):
+        model = Author
+        fields = '__all__'
+        initial = {'date_of_death': '05/01/2018'}
+    
+    class AuthorUpdate(UpdateView):
+        model = Author
+        fields = ['first_name', 'last_name', 'date_of_birth', 'date_of_death']
+    
+    class AuthorDelete(DeleteView):
+        model = Author
+        success_url = reverse_lazy('authors')
+    ```
  
 ### Juice out
 - Can you notice? Django is just
