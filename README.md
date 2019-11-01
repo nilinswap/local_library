@@ -554,7 +554,35 @@ Permissions are associated with models and define the operations that can be per
                 # Note that 'catalog.can_edit' is just an example
                 # the catalog application doesn't have such permission!
         ```
-###Juice out
+        
+#### Django Forms
+Django Forms does most things for you.
+The declaration syntax for a Form is very similar to that for declaring a Model, and shares the same field types (and some similar parameters).
+- Create and open the file locallibrary/catalog/forms.py and populate with following
+    ```python
+    import datetime
+    from django import forms
+    from django.core.exceptions import ValidationError
+    from django.utils.translation import ugettext_lazy as _
+    
+    class RenewBookForm(forms.Form):
+        renewal_date = forms.DateField(help_text="Enter a date between now and 4 weeks (default 3).")
+    
+        def clean_renewal_date(self):
+            data = self.cleaned_data['renewal_date']
+            
+            # Check if a date is not in the past. 
+            if data < datetime.date.today():
+                raise ValidationError(_('Invalid date - renewal in past'))
+    
+            # Check if a date is in the allowed range (+4 weeks from today).
+            if data > datetime.date.today() + datetime.timedelta(weeks=4):
+                raise ValidationError(_('Invalid date - renewal more than 4 weeks ahead'))
+    
+            # Remember to always return the cleaned data.
+            return data
+    ``` 
+### Juice out
 - Can you notice? Django is just
     - Extend model and migrate
     - Extend view that uses model
