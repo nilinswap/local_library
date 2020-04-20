@@ -24,7 +24,7 @@ public==2018.11.20
 pycrypto==2.6.1
 python-dateutil==2.8.0
 python-pkcs11==0.5.0
-PyYAML==3.13
+PyYAML==5.1
 query-string==2018.11.20
 realm-cli==0.0.5
 request==2018.11.20
